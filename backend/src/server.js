@@ -30,7 +30,7 @@ app.get('/', (req, res) => {
  * is unavailable.
  */
 const startServer = async () => {
- await connectDB(); 
+  await connectDB();
 
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
