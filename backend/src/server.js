@@ -17,10 +17,17 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Parse incoming JSON request bodies. Required so that POST endpoints
+// can read the report data sent by the client.
+app.use(express.json());
+
 // Temporary root route used to verify that the API is up and running.
 app.get('/', (req, res) => {
   res.json({ message: 'Emajens API is running' });
 });
+
+// Emergency report API endpoints (see routes/emergencyRoutes.js).
+app.use('/api/emergencies', require('./routes/emergencyRoutes'));
 
 /**
  * Starts the backend server.
