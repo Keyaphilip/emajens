@@ -48,4 +48,32 @@ const getEmergencies = async (req, res) => {
   }
 };
 
-module.exports = { createEmergency, getEmergencies };
+/**
+ * GET /api/emergencies/:id
+ *
+ * Returns a single emergency report by its MongoDB ID.
+ * Responds with 404 when no report with that ID exists, and 400 when
+ * the ID is not a valid MongoDB ObjectId format.
+ */
+const getEmergencyById = async (req, res) => {
+  try {
+    const emergency = await Emergency.findById(req.params.id);
+
+    // findById returns null when nothing matches. That is a normal
+    // outcome (not an error), so we answer with 404 ourselves.
+    if (!emergency) {
+      return res.status(404).json({ success: false, message: 'Emergency report not found' });
+    }
+
+    res.status(200).json({ success: true, data: emergency });
+  } catch (error) {
+    // CastError means the ID was not a valid ObjectId format at all
+    // (e.g. "hello"), so the request itself is malformed.
+    if (error.name === 'CastError') {
+      return res.status(400).json({ success: false, message: 'Invalid report ID format' });
+    }
+    res.status(500).json({ success: false, message: 'Server error while fetching report' });
+  }
+};
+
+module.exports = { createEmergency, getEmergencies, getEmergencyById };
