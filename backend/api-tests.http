@@ -1,0 +1,46 @@
+### Emajens API tests (REST Client extension)
+### With the extension installed, a "Send Request" link appears above
+### each request. Requests are separated by ### lines.
+
+# Base URL shared by all requests below. If your backend runs on a
+# different port, this is the only line you need to change.
+@baseUrl = http://localhost:5000/api/emergencies
+
+### 1. Create a new emergency report
+### Expect: 201 with { success: true, data: { ... } }
+POST {{baseUrl}}
+Content-Type: application/json
+
+{
+  "type": "Medical",
+  "description": "Student injured near the engineering block",
+  "location": {
+    "latitude": 6.5244,
+    "longitude": 3.3792
+  }
+}
+
+### 2. Get all emergency reports (newest first)
+### Expect: 200 with { success: true, count: N, data: [ ... ] }
+GET {{baseUrl}}
+
+### 3. Get a single report by ID
+### Uses a real _id copied from request 1's response.
+### Expect: 200 with the report, or 404 if the ID does not exist.
+GET {{baseUrl}}/6ac4cf83036f412df0147265
+
+### 4. Negative test: malformed ID
+### Expect: 400 with "Invalid report ID format"
+GET {{baseUrl}}/not-a-real-id
+
+### 5. Negative test: missing required fields
+### Expect: 400 validation error (type and description are required)
+POST {{baseUrl}}
+Content-Type: application/json
+
+{
+  "location": {
+    "latitude": 6.5244,
+    "longitude": 3.3792
+  }
+}
