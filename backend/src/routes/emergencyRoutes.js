@@ -7,7 +7,7 @@
  * controllers makes it easy to see all available endpoints at a glance.
  */
 const express = require('express');
-const { createEmergency, getEmergencies, getEmergencyById } = require('../controllers/emergencyController');
+const { createEmergency, getEmergencies, getEmergencyById, updateEmergency } = require('../controllers/emergencyController');
 
 const router = express.Router();
 
@@ -17,5 +17,6 @@ router.get('/', getEmergencies);
 // Parameterized routes go last: /:id matches ANY single path segment,
 // so it would swallow any fixed GET route declared below it.
 router.get('/:id', getEmergencyById);
+router.put('/:id', updateEmergency);
 
 module.exports = router;

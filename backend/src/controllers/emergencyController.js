@@ -76,4 +76,49 @@ const getEmergencyById = async (req, res) => {
   }
 };
 
-module.exports = { createEmergency, getEmergencies, getEmergencyById };
+/**
+ * PUT /api/emergencies/:id
+ *
+ * Updates an existing emergency report. Only the fields sent in the
+ * request body are changed (partial update); the rest stay as they were.
+ *
+ * Two findByIdAndUpdate options do critical work here:
+ * - new: true           -> return the document AFTER the update. The
+ *                          default is to return the pre-update document,
+ *                          which would confuse the client.
+ * - runValidators: true -> apply schema rules (enum, min/max) to the
+ *                          update. By default Mongoose validates ONLY on
+ *                          create, so without this an invalid status like
+ *                          "Banana" would be saved silently.
+ */
+const updateEmergency = async (req, res) => {
+  try {
+    const emergency = await Emergency.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    // null means no report with that ID exists.
+    if (!emergency) {
+      return res.status(404).json({ success: false, message: 'Emergency report not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Emergency report updated successfully',
+      data: emergency,
+    });
+  } catch (error) {
+    // Malformed ObjectId (e.g. "hello") -> the client's request is bad.
+    if (error.name === 'CastError') {
+      return res.status(400).json({ success: false, message: 'Invalid report ID format' });
+    }
+    // Schema rules rejected the new values (e.g. invalid status enum).
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    res.status(500).json({ success: false, message: 'Server error while updating report' });
+  }
+};
+
+module.exports = { createEmergency, getEmergencies, getEmergencyById, updateEmergency };

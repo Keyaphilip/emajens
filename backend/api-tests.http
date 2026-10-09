@@ -44,3 +44,35 @@ Content-Type: application/json
     "longitude": 3.3792
   }
 }
+
+### 6. Update a report (partial update: only status changes)
+### Uses the same _id as request 3.
+### Expect: 200 with the updated report, status now "Under Review",
+### all other fields unchanged. Note "updatedAt" moves forward.
+PUT {{baseUrl}}/6ac4cf83036f412df0147265
+Content-Type: application/json
+
+{
+  "status": "Under Review"
+}
+
+### 7. Negative test: update with an invalid status value
+### Expect: 400 validation error (enum rejects "Banana").
+### This is the proof that runValidators works: without it, this
+### invalid value would be saved into the database silently.
+PUT {{baseUrl}}/6ac4cf83036f412df0147265
+Content-Type: application/json
+
+{
+  "status": "Banana"
+}
+
+### 8. Negative test: update an ID that does not exist
+### Valid ObjectId format (24 hex chars) but no such report.
+### Expect: 404 "Emergency report not found"
+PUT {{baseUrl}}/6ac4cf83036f412df0147000
+Content-Type: application/json
+
+{
+  "status": "Resolved"
+}
